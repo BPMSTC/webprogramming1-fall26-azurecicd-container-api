@@ -1,6 +1,57 @@
 @baseballfun_HostAddress = http://localhost:5158
 
-GET {{baseballfun_HostAddress}}/weatherforecast/
+### Players
+GET {{baseballfun_HostAddress}}/api/players
 Accept: application/json
+
+###
+GET {{baseballfun_HostAddress}}/api/players?position=Pitcher
+
+###
+GET {{baseballfun_HostAddress}}/api/players/1
+
+###
+POST {{baseballfun_HostAddress}}/api/players
+Content-Type: application/json
+
+{
+  "name": "Test Player",
+  "number": 99,
+  "position": "FirstBase",
+  "bats": "Left",
+  "throws": "Right"
+}
+
+###
+GET {{baseballfun_HostAddress}}/api/players/1/stats
+
+###
+POST {{baseballfun_HostAddress}}/api/players/1/stats
+Content-Type: application/json
+
+{
+  "season": 2026,
+  "atBats": 100,
+  "hits": 30,
+  "homeRuns": 5
+}
+
+### Games
+GET {{baseballfun_HostAddress}}/api/games
+
+###
+GET {{baseballfun_HostAddress}}/api/games?opponent=cubs
+
+###
+POST {{baseballfun_HostAddress}}/api/games
+Content-Type: application/json
+
+{
+  "gameDate": "2026-06-01",
+  "opponent": "Chicago Cubs",
+  "isHome": false,
+  "brewersRuns": 4,
+  "opponentRuns": 2
+}
 
 ###

@@ -1,14 +1,22 @@
+using System.Text.Json.Serialization;
+using baseballfun.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+
+// Phase 1: in-memory storage. Phase 2 swaps these registrations for EF Core / SQL Server repositories.
+builder.Services.AddSingleton<IPlayerRepository, InMemoryPlayerRepository>();
+builder.Services.AddSingleton<IGameRepository, InMemoryGameRepository>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

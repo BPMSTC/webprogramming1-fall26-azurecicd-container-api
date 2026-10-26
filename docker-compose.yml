@@ -1,0 +1,42 @@
+name: brewers
+
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:?Set SA_PASSWORD in the .env file (copy .env.example to .env)}
+    ports:
+      # Bound to localhost only, for SSMS / Azure Data Studio / running the API from Visual Studio.
+      # Change SQL_HOST_PORT in .env if 1433 is already used by a local SQL Server.
+      - "127.0.0.1:${SQL_HOST_PORT:-1433}:1433"
+    volumes:
+      # Named volume: data survives `docker compose down` and container re-creation. `down -v` deletes it.
+      - brewers-sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  api:
+    build:
+      context: .
+      dockerfile: baseballfun/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      sql:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_HTTP_PORTS: "8080"
+      # Encrypt=True with TrustServerCertificate=True: traffic is encrypted, but the local container's
+      # self-signed certificate is accepted. Azure uses TrustServerCertificate=False.
+      ConnectionStrings__BrewersDb: "Server=sql,1433;Database=BrewersDb;User Id=sa;Password=${SA_PASSWORD};Encrypt=True;TrustServerCertificate=True"
+    ports:
+      - "8080:8080"
+
+volumes:
+  brewers-sqldata:

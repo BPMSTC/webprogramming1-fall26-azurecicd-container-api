@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using baseballfun;
 using baseballfun.Data;
 using baseballfun.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,8 @@ else
 }
 
 var app = builder.Build();
+
+await app.InitializeDatabaseAsync();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
